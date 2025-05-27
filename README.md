@@ -20,7 +20,7 @@ A full-stack web application for managing student feedback using Express.js and 
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/AbdurRafaybahria/openEnded.git
 ```
 
 2. Install backend dependencies:
@@ -56,7 +56,7 @@ The application will be available at `http://localhost:3000`
 ## Project Structure
 
 ```
-student-feedback-management/
+openEnded/
 ├── backend/           # Express.js backend
 │   ├── server.js      # Main server file
 │   └── package.json
@@ -64,7 +64,8 @@ student-feedback-management/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── FeedbackForm.js
-│   │   │   └── FeedbackList.js
+│   │   │   ├── FeedbackList.js
+│   │   │   └── AdminView.js
 │   │   ├── App.js
 │   │   └── App.css
 │   └── package.json
