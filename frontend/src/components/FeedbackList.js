@@ -44,12 +44,30 @@ const FeedbackList = ({ refreshTrigger }) => {
     const filteredFeedbacks = selectedSubject 
         ? feedbacks.filter(f => f.subject === selectedSubject)
         : feedbacks;
+        
+    // Function to render star rating
+    const renderStars = (rating) => {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            stars.push(
+                <span key={i} className={`table-star ${i <= rating ? 'filled' : ''}`}>
+                    ★
+                </span>
+            );
+        }
+        return <div className="star-display">{stars}</div>;
+    };
 
     return (
         <div className="feedback-list">
             <h2>Feedback List</h2>
             <div className="filter-section">
-                <select value={selectedSubject} onChange={handleSubjectChange}>
+                <label htmlFor="subject-filter">Filter by Subject:</label>
+                <select 
+                    id="subject-filter"
+                    value={selectedSubject} 
+                    onChange={handleSubjectChange}
+                >
                     <option value="">All Subjects</option>
                     {Object.keys(averageRatings).map(subject => (
                         <option key={subject} value={subject}>
@@ -58,29 +76,51 @@ const FeedbackList = ({ refreshTrigger }) => {
                     ))}
                 </select>
             </div>
+            
+            {selectedSubject && (
+                <div className="average-rating-display">
+                    <h3>Average Rating for {selectedSubject}</h3>
+                    <div className="large-rating">
+                        {renderStars(parseFloat(averageRatings[selectedSubject]))}
+                        <span className="large-rating-number">{averageRatings[selectedSubject]}</span>
+                    </div>
+                </div>
+            )}
             <div className="feedback-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Subject</th>
-                            <th>Rating</th>
-                            <th>Comments</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredFeedbacks.map((feedback) => (
-                            <tr key={feedback._id}>
-                                <td>{feedback.studentName}</td>
-                                <td>{feedback.subject}</td>
-                                <td>{feedback.rating}</td>
-                                <td>{feedback.comments || 'No comments'}</td>
-                                <td>{new Date(feedback.createdAt).toLocaleDateString()}</td>
+                {filteredFeedbacks.length > 0 ? (
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Subject</th>
+                                <th>Rating</th>
+                                <th>Comments</th>
+                                <th>Date</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {filteredFeedbacks.map((feedback) => (
+                                <tr key={feedback._id}>
+                                    <td>{feedback.studentName}</td>
+                                    <td>{feedback.subject}</td>
+                                    <td>{renderStars(feedback.rating)}</td>
+                                    <td className="comments-cell">{feedback.comments || 'No comments'}</td>
+                                    <td>{new Date(feedback.createdAt).toLocaleDateString()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <div className="no-feedback">
+                        <div className="no-data-icon">📋</div>
+                        <p>No feedback entries found{selectedSubject ? ` for ${selectedSubject}` : ''}.</p>
+                        {selectedSubject && (
+                            <button className="small-button" onClick={() => setSelectedSubject('')}>
+                                Show All Feedback
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

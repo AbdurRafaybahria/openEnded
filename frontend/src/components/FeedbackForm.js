@@ -5,11 +5,12 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
     const [formData, setFormData] = useState({
         studentName: '',
         subject: '',
-        rating: 1,
+        rating: 3, // Default to middle rating
         comments: ''
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -21,13 +22,14 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             await axios.post('http://localhost:5000/api/feedback', formData);
-            setSuccess('Feedback submitted successfully!');
+            setSuccess('✅ Feedback submitted successfully!');
             setFormData({
                 studentName: '',
                 subject: '',
-                rating: 1,
+                rating: 3,
                 comments: ''
             });
             setError('');
@@ -39,7 +41,26 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
         } catch (err) {
             setError(err.response?.data?.message || 'Error submitting feedback');
             setSuccess('');
+        } finally {
+            setIsSubmitting(false);
         }
+    };
+
+    // Generate star rating UI
+    const renderRatingStars = () => {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            stars.push(
+                <span 
+                    key={i} 
+                    className={`star ${parseInt(formData.rating) >= i ? 'filled' : ''}`}
+                    onClick={() => setFormData({...formData, rating: i})}
+                >
+                    ★
+                </span>
+            );
+        }
+        return stars;
     };
 
     return (
@@ -47,52 +68,52 @@ const FeedbackForm = ({ onFeedbackSubmitted }) => {
             <h2>Submit Feedback</h2>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Student Name:</label>
+                    <label htmlFor="studentName">Student Name</label>
                     <input
+                        id="studentName"
                         type="text"
                         name="studentName"
                         value={formData.studentName}
                         onChange={handleChange}
+                        placeholder="Enter your full name"
                         required
                     />
                 </div>
                 <div className="form-group">
-                    <label>Subject:</label>
+                    <label htmlFor="subject">Subject</label>
                     <input
+                        id="subject"
                         type="text"
                         name="subject"
                         value={formData.subject}
                         onChange={handleChange}
+                        placeholder="Enter subject name"
                         required
                     />
                 </div>
                 <div className="form-group">
-                    <label>Rating (1-5):</label>
-                    <select
-                        name="rating"
-                        value={formData.rating}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
+                    <label>Rating</label>
+                    <div className="star-rating">
+                        {renderRatingStars()}
+                        <span className="rating-text">{formData.rating} of 5</span>
+                    </div>
                 </div>
                 <div className="form-group">
-                    <label>Comments:</label>
+                    <label htmlFor="comments">Comments (Optional)</label>
                     <textarea
+                        id="comments"
                         name="comments"
                         value={formData.comments}
                         onChange={handleChange}
+                        placeholder="Share your thoughts about this subject..."
                         rows="4"
                     ></textarea>
                 </div>
-                <button type="submit">Submit Feedback</button>
+                <button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                </button>
             </form>
-            {error && <div className="error">{error}</div>}
+            {error && <div className="error">❌ {error}</div>}
             {success && <div className="success">{success}</div>}
         </div>
     );
